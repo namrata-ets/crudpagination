@@ -1,6 +1,6 @@
 <template>
   <v-container>
- <div class="text-lg-6 text-center font-weight-medium secondary" >
+ <div class=".text-xl-h4 text-center font-weight-medium secondary" >
     Airline Reservation System
  </div>
   </v-container>
