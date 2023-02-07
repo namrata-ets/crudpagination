@@ -1,66 +1,129 @@
+<!-- eslint-disable no-undef -->
+<!-- eslint-disable no-undef -->
 <template>
   <v-container>
- <div class=".text-xl-h4 text-center font-weight-medium secondary" >
-    Airline Reservation System
- </div>
+    <h1 class="display-2 text-center font-weight-bold mb-3  my-5">
+      Airline Reservation System
+    </h1>
+
+    <div>
+      <v-data-table
+        :server-items-length="totalPassengers"
+        :headers="headers"
+        :items="passengers"
+        :items-per-page="10"
+        :options.sync="options"
+        :loading="loading"
+        >
+     
+      </v-data-table>
+      
+    </div>
   </v-container>
 </template>
-
 <script>
-  export default {
-    name: 'HelloWorld',
+import axios from "axios";
+export default {
+  name: "HelloWorld",
+  data() {
+    return {
+      totalPassengers: 0,
+      passengers: [],
+      airlineName: " ",
+      loading: true,
+      options: {},
+      headers: [
+        { text: "Passenger Name", value: "name" },
+        { text: "Number of Trips", value: "trips" },
+        {
+          text: "Airline Name",
+          sortable: false,
+          value: 'airline',
+        },
+      ],
+      airlineData: [],
 
-    data: () => ({
-      ecosystem: [
-        {
-          text: 'vuetify-loader',
-          href: 'https://github.com/vuetifyjs/vuetify-loader',
-        },
-        {
-          text: 'github',
-          href: 'https://github.com/vuetifyjs/vuetify',
-        },
-        {
-          text: 'awesome-vuetify',
-          href: 'https://github.com/vuetifyjs/awesome-vuetify',
-        },
-      ],
-      importantLinks: [
-        {
-          text: 'Documentation',
-          href: 'https://vuetifyjs.com',
-        },
-        {
-          text: 'Chat',
-          href: 'https://community.vuetifyjs.com',
-        },
-        {
-          text: 'Made with Vuetify',
-          href: 'https://madewithvuejs.com/vuetify',
-        },
-        {
-          text: 'Twitter',
-          href: 'https://twitter.com/vuetifyjs',
-        },
-        {
-          text: 'Articles',
-          href: 'https://medium.com/vuetify',
-        },
-      ],
-      whatsNext: [
-        {
-          text: 'Explore components',
-          href: 'https://vuetifyjs.com/components/api-explorer',
-        },
-        {
-          text: 'Select a layout',
-          href: 'https://vuetifyjs.com/getting-started/pre-made-layouts',
-        },
-        {
-          text: 'Frequently Asked Questions',
-          href: 'https://vuetifyjs.com/getting-started/frequently-asked-questions',
-        },
-      ],
-    }),
+      reqObj: {
+        name: "John Doe",
+        trips: 250,
+        airline: 5,
+      },
+    };
+  },
+  watch: {
+    options: {
+      handler() {
+        this.getDataFromApi();
+      },
+      deep: true,
+    },
+  },
+  methods: {
+    async getDataFromApi() {
+        this.loading = true;
+        await axios
+          .get(`https://api.instantwebtools.net/v1/passenger?page=3889&size=10`)
+          .then((response) => (this.airlineData = response.data))
+          .catch((error) => console.log(error));
+        console.log(this.airlineData);
+
+        this.totalPassengers = this.airlineData.totalPassengers;
+        console.log(
+          "The total number of passengers till date is: " + this.totalPassengers
+        );
+        this.loading = false;
+        this.getPassengersData();
+        this.fakeApiCall();
+    },
+    async getPassengersData() {
+        await axios
+          .get(`https://api.instantwebtools.net/v1/passenger?page=3889&size=10`)
+          .then((response) => (this.passengers = response.data.data))
+          .catch((error) => console.log(error));
+        console.log("Passenger data fetched from API is: " + this.passengers);
+
+        for (var i = 0; i < this.passengers.length; i++) {
+          var airlineName = this.passengers[i].airline;
+          console.log(airlineName);
+        }
+      },
+      fakeApiCall () {
+        return new Promise((resolve) => {
+          const { sortBy, sortDesc, page, itemsPerPage } = this.options
+
+          let items = this.getPassengersData()
+          const total = items.length
+
+          if (sortBy.length === 1 && sortDesc.length === 1) {
+            items = items.sort((a, b) => {
+              const sortA = a[sortBy[0]]
+              const sortB = b[sortBy[0]]
+
+              if (sortDesc[0]) {
+                if (sortA < sortB) return 1
+                if (sortA > sortB) return -1
+                return 0
+              } else {
+                if (sortA < sortB) return -1
+                if (sortA > sortB) return 1
+                return 0
+              }
+            })
+          }
+
+          if (itemsPerPage > 0) {
+            items = this.passengers.splice((page - 1) * itemsPerPage, page * itemsPerPage)
+          }
+
+          setTimeout(() => {
+            resolve({
+              items,
+              total,
+            })
+          }, 1000)
+        })
+      },
+    }
   }
+ 
 </script>
