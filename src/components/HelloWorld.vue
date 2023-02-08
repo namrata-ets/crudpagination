@@ -16,8 +16,11 @@
         :loading="loading"
       >
       </v-data-table>
+      
     </div>
-
+    <template v-slot:items="passengers">
+        {{passengers.airline }}
+      </template>
     <v-pagination
       v-model="page"
       :length="4"
@@ -26,6 +29,12 @@
       prev-icon="mdi-menu-left"
       next-icon="mdi-menu-right"
     ></v-pagination>
+    <v-for name in airline :bind="airline.id">
+      <h2><template>
+        {{ airline }}
+      </template>
+    </h2>
+  </v-for>
   </v-container>
 </template>
 <script>
@@ -39,7 +48,7 @@ export default {
       totalPages: 0,
       passengers: [],
       pageno: 6290,
-      airlineName: " ",
+      airline: [],
       loading: true,
       name: [],
       options: {},
@@ -72,7 +81,7 @@ export default {
     async getDataFromApi() {
       this.loading = true;
       await axios
-        .get(`https://api.instantwebtools.net/v1/passenger?page=6297&size=10`)
+        .get(`https://api.instantwebtools.net/v1/passenger?page=6641&size=10`)
         .then((response) => (this.airlineData = response.data))
         .catch((error) => console.log(error));
       console.log(this.airlineData);
@@ -92,16 +101,21 @@ export default {
     },
     async getPassengersData() {
       await axios
-        .get(`https://api.instantwebtools.net/v1/passenger?page=3889&size=10`)
+        .get(`https://api.instantwebtools.net/v1/passenger?page=6635&size=10`)
         .then((response) => (this.passengers = response.data.data))
         .catch((error) => console.log(error));
-      console.log("Passenger data fetched from API is: " + this.passengers);
+      console.log("Passenger data fetched from API is: " + JSON.stringify(this.passengers));
 
       for (var i = 0; i < this.passengers.length; i++) {
         this.airlineName = this.passengers[i].airline;
         this.name = this.passengers[i].name;
         console.log(this.name);
         console.log(this.airlineName);
+
+        for(var x in this.airlineName){
+          this.airline=this.airlineName[x].name;
+          console.log(this.airline);
+        }
       }
     },
     fakeApiCall() {
